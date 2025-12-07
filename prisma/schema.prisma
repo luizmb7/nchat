@@ -20,7 +20,7 @@ model User {
   messages  Message[]
   rooms     Room[]   @relation("UserRooms")
 
-  @@map("tbl_User")
+  @@map("tbl_user")
 }
 
 model Room {
@@ -31,7 +31,7 @@ model Room {
   users     User[]   @relation("UserRooms")
   messages  Message[]
 
-  @@map("tbl_Room")
+  @@map("tbl_room")
 }
 
 model Message {
@@ -46,5 +46,5 @@ model Message {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
 
-  @@map("tbl_Message")
+  @@map("tbl_message")
 }
