@@ -64,6 +64,12 @@ EasyPanel is a modern server management panel based on Docker. This guide explai
   - Since this is a production env, you should use `prisma migrate deploy` instead of `prisma migrate dev`.
   - In `package.json`, add a script `"migrate": "prisma migrate deploy"`.
   - Configure EasyPanel to run this command on start or post-deploy.
+- **Prisma Client Error (libssl.so.1.1)**:
+  - This error occurs when deploying to Alpine Linux environments.
+  - **Solution**: The project is already configured to handle this:
+    - `Dockerfile` installs OpenSSL compatibility: `RUN apk add --no-cache openssl`
+    - `prisma/schema.prisma` includes the correct binaryTarget: `linux-musl-openssl-3.0.x`
+  - If you still encounter this error, ensure you're using the latest version of the code and rebuild the container.
 
 ## Updates
 
