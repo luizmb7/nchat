@@ -38,6 +38,8 @@ interface JoinRoomPayload {
 interface CreateRoomPayload {
   name: string;
   userId: string; // creator
+  username?: string; // optional username for user creation
+  avatar?: string; // optional avatar for user creation
 }
 
 interface SendMessagePayload {
@@ -59,15 +61,24 @@ io.on('connection', (socket: Socket) => {
   // 1. Create Room
   socket.on('create_room', async (payload: CreateRoomPayload) => {
     try {
-      const { name, userId } = payload;
-      // Ensure user exists (in a real app, middleware would handle auth/user existence)
-      // Here we assume client joins with an ID or we strictly just link it.
-      // Let's rely on join_room to create user if needed or just assume ID is valid UUID.
-      // For robustness:
+      const { name, userId, username, avatar } = payload;
+      
+      // Validate required fields
+      if (!name || !userId) {
+        socket.emit('error', { 
+          code: 'INVALID_PAYLOAD', 
+          message: 'Missing required fields: name and userId' 
+        });
+        return;
+      }
+      
+      // Ensure user exists before creating room
+      const finalUsername = username || `User_${userId.substring(0, 8)}`;
+      await createUser(userId, finalUsername, avatar);
       
       const newRoom = await createRoom(name, [userId]);
       socket.emit('room_created', newRoom);
-      console.log(`Room created: ${newRoom.name} (${newRoom.id}) by ${userId}`);
+      console.log(`Room created: ${newRoom.name} (${newRoom.id}) by ${finalUsername}`);
     } catch (err) {
       console.error("Error creating room:", err);
       socket.emit('error', { code: 'CREATE_ROOM_FAILED', message: 'Failed to create room' });

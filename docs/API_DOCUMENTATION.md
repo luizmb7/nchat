@@ -18,9 +18,13 @@ Create a new chat room.
 ```json
 {
   "name": "General Chat",
-  "userId": "user-uuid"
+  "userId": "user-uuid",
+  "username": "JohnDoe", // Optional - defaults to "User_{userId}"
+  "avatar": "https://example.com/avatar.png" // Optional
 }
 ```
+
+**Note**: If the user doesn't exist, it will be created automatically with the provided username and avatar.
 
 ### 2. Join Room
 
