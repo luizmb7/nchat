@@ -33,6 +33,3 @@ Thumbs.db
 # Testing
 coverage
 .nyc_output
-
-# Prisma
-prisma/migrations/migration_lock.toml
