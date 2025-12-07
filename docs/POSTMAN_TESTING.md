@@ -1,6 +1,14 @@
 # Testando o WebSocket Server com Postman
 
-Este guia mostra como testar o servidor WebSocket usando o Postman.
+> **⚠️ IMPORTANTE**: O Postman pode ter dificuldades com Socket.IO porque não escuta eventos automaticamente.
+>
+> **✅ RECOMENDADO**: Use o **`test-client.html`** incluído no projeto! Ele escuta TODOS os eventos automaticamente e tem uma interface visual completa.
+>
+> 📖 Veja o guia completo em: **`TEST_CLIENT_GUIDE.md`**
+
+---
+
+Este guia mostra como testar o servidor WebSocket usando o Postman (com limitações).
 
 ## Configuração Inicial
 
@@ -40,7 +48,7 @@ create_room
 ```json
 {
   "name": "General Chat",
-  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "userId": "550e8400-e29b-41d4-a716-446655440000", // e8ea4b43-47cd-425e-8be5-6c4aebfcaa61
   "username": "JohnDoe",
   "avatar": "https://i.pravatar.cc/150?img=1"
 }
