@@ -12,14 +12,14 @@ EasyPanel is a modern server management panel based on Docker. This guide explai
 1. Open your EasyPanel dashboard.
 2. Create a new **Project** (e.g., `Chat App`).
 
-## Step 2: Deploy PostgreSQL Database
+## Step 2: Deploy MariaDB Database
 
 1. Inside the project, click **+ Service**.
-2. Select **Postgres**.
-3. Name it `postgres` (or `db`).
+2. Select **MariaDB** (or **MySQL**).
+3. Name it `mariadb` (or `db`).
 4. Click **Create**.
 5. Go to the service **Environment** or **Connection** tab to view the credentials (Password, Internal URL).
-   - You will need the **Internal Connection URL** (e.g., `postgresql://postgres:password@postgres:5432/postgres`).
+   - You will need the **Internal Connection URL** (e.g., `mysql://user:password@mariadb:3306/nchat`).
 
 ## Step 3: Deploy the WebSocket Server
 
@@ -37,8 +37,8 @@ EasyPanel is a modern server management panel based on Docker. This guide explai
 2. Add the following variables:
    - `PORT`: `3000`
    - `DATABASE_URL`: Paste the Internal Connection URL from Step 2.
-     - **Important**: Ensure the database name in the URL matches what you want (e.g., `.../nchat?schema=public`).
-     - Example: `postgresql://postgres:randompassword@postgres:5432/nchat?schema=public`
+     - **Important**: Ensure the database name in the URL matches what you want (e.g., `.../nchat`).
+     - Example: `mysql://user:randompassword@mariadb:3306/nchat`
 
 ## Step 5: Network & Domain
 
@@ -57,7 +57,7 @@ EasyPanel is a modern server management panel based on Docker. This guide explai
 
 - **Database Connection Error**:
   - Ensure the `DATABASE_URL` is correct.
-  - Verify the `postgres` service is running.
+  - Verify the `mariadb` service is running.
   - Check if Prisma migrations were applied. You may need to add a "Deploy Command" in EasyPanel settings:
     - `npx prisma migrate deploy`
 - **Migration Strategy**:

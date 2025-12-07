@@ -7,33 +7,37 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   username  String   @unique
-  avatar    String?
+  avatar    String?  @db.Text
   createdAt DateTime @default(now())
   
   messages  Message[]
   rooms     Room[]   @relation("UserRooms")
+
+  @@map("tbl_User")
 }
 
 model Room {
-  id        String   @id @default(uuid())
-  name      String
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(255)
   createdAt DateTime @default(now())
   
   users     User[]   @relation("UserRooms")
   messages  Message[]
+
+  @@map("tbl_Room")
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  content   String
-  type      String   @default("text") // text, image
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  type      String   @default("text") @db.VarChar(50)
   createdAt DateTime @default(now())
   
   roomId    String
@@ -41,4 +45,6 @@ model Message {
   
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+
+  @@map("tbl_Message")
 }

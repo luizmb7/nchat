@@ -1,127 +1,102 @@
 -- ============================================
--- Script SQL para Criar Todas as Tabelas
--- Execute este script no seu cliente SQL
+-- Script SQL para Criar Todas as Tabelas (MariaDB)
+-- Execute este script no seu cliente SQL MariaDB
 -- ============================================
 
--- 1. Criar tabela User
-CREATE TABLE IF NOT EXISTS "User" (
-    "id" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
-    "avatar" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
+-- 1. Criar tabela tbl_User
+CREATE TABLE IF NOT EXISTS `tbl_User` (
+    `id` VARCHAR(191) NOT NULL,
+    `username` VARCHAR(191) NOT NULL,
+    `avatar` TEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `tbl_User_username_key`(`username`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 2. Criar tabela Room
-CREATE TABLE IF NOT EXISTS "Room" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Room_pkey" PRIMARY KEY ("id")
-);
+-- 2. Criar tabela tbl_Room
+CREATE TABLE IF NOT EXISTS `tbl_Room` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 3. Criar tabela Message
-CREATE TABLE IF NOT EXISTS "Message" (
-    "id" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "type" TEXT NOT NULL DEFAULT 'text',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "roomId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
-);
+-- 3. Criar tabela tbl_Message
+CREATE TABLE IF NOT EXISTS `tbl_Message` (
+    `id` VARCHAR(191) NOT NULL,
+    `content` TEXT NOT NULL,
+    `type` VARCHAR(50) NOT NULL DEFAULT 'text',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `roomId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 4. Criar tabela de relacionamento _UserRooms
-CREATE TABLE IF NOT EXISTS "_UserRooms" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL,
-    CONSTRAINT "_UserRooms_AB_pkey" PRIMARY KEY ("A","B")
-);
+-- 4. Criar tabela de relacionamento tbl_UserRooms
+CREATE TABLE IF NOT EXISTS `tbl_UserRooms` (
+    `A` VARCHAR(191) NOT NULL,
+    `B` VARCHAR(191) NOT NULL,
+    UNIQUE INDEX `tbl_UserRooms_AB_unique`(`A`, `B`),
+    INDEX `tbl_UserRooms_B_index`(`B`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 5. Criar índices
-CREATE UNIQUE INDEX IF NOT EXISTS "User_username_key" ON "User"("username");
-CREATE INDEX IF NOT EXISTS "_UserRooms_B_index" ON "_UserRooms"("B");
+-- 5. Adicionar Foreign Keys
+ALTER TABLE `tbl_Message` 
+ADD CONSTRAINT `tbl_Message_roomId_fkey` 
+FOREIGN KEY (`roomId`) REFERENCES `tbl_Room`(`id`) 
+ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- 6. Adicionar Foreign Keys (com verificação)
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'Message_roomId_fkey'
-    ) THEN
-        ALTER TABLE "Message" ADD CONSTRAINT "Message_roomId_fkey" 
-        FOREIGN KEY ("roomId") REFERENCES "Room"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-    END IF;
-END $$;
+ALTER TABLE `tbl_Message` 
+ADD CONSTRAINT `tbl_Message_userId_fkey` 
+FOREIGN KEY (`userId`) REFERENCES `tbl_User`(`id`) 
+ON DELETE RESTRICT ON UPDATE CASCADE;
 
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'Message_userId_fkey'
-    ) THEN
-        ALTER TABLE "Message" ADD CONSTRAINT "Message_userId_fkey" 
-        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-    END IF;
-END $$;
+ALTER TABLE `tbl_UserRooms` 
+ADD CONSTRAINT `tbl_UserRooms_A_fkey` 
+FOREIGN KEY (`A`) REFERENCES `tbl_Room`(`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;
 
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = '_UserRooms_A_fkey'
-    ) THEN
-        ALTER TABLE "_UserRooms" ADD CONSTRAINT "_UserRooms_A_fkey" 
-        FOREIGN KEY ("A") REFERENCES "Room"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-    END IF;
-END $$;
+ALTER TABLE `tbl_UserRooms` 
+ADD CONSTRAINT `tbl_UserRooms_B_fkey` 
+FOREIGN KEY (`B`) REFERENCES `tbl_User`(`id`) 
+ON DELETE CASCADE ON UPDATE CASCADE;
 
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = '_UserRooms_B_fkey'
-    ) THEN
-        ALTER TABLE "_UserRooms" ADD CONSTRAINT "_UserRooms_B_fkey" 
-        FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-    END IF;
-END $$;
+-- 6. Criar tabela de migrations do Prisma (para rastreamento)
+CREATE TABLE IF NOT EXISTS `_prisma_migrations` (
+    `id` VARCHAR(36) NOT NULL,
+    `checksum` VARCHAR(64) NOT NULL,
+    `finished_at` DATETIME(3) NULL,
+    `migration_name` VARCHAR(255) NOT NULL,
+    `logs` TEXT NULL,
+    `rolled_back_at` DATETIME(3) NULL,
+    `started_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `applied_steps_count` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 7. Criar tabela de migrations do Prisma (para rastreamento)
-CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
-    "id" VARCHAR(36) NOT NULL,
-    "checksum" VARCHAR(64) NOT NULL,
-    "finished_at" TIMESTAMP(3),
-    "migration_name" VARCHAR(255) NOT NULL,
-    "logs" TEXT,
-    "rolled_back_at" TIMESTAMP(3),
-    "started_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "applied_steps_count" INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT "_prisma_migrations_pkey" PRIMARY KEY ("id")
-);
-
--- 8. Registrar a migration como aplicada
-INSERT INTO "_prisma_migrations" 
-("id", "checksum", "migration_name", "finished_at", "applied_steps_count")
+-- 7. Registrar a migration como aplicada
+INSERT INTO `_prisma_migrations` 
+(`id`, `checksum`, `migration_name`, `finished_at`, `applied_steps_count`)
 VALUES 
 (
-    '20251207_init',
+    '20251207_mariadb_init',
     '0',
-    '20251207_init',
-    CURRENT_TIMESTAMP,
+    '20251207_mariadb_init',
+    CURRENT_TIMESTAMP(3),
     1
 )
-ON CONFLICT DO NOTHING;
+ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ============================================
 -- Verificação
 -- ============================================
 
 -- Listar todas as tabelas
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-ORDER BY table_name;
+SHOW TABLES;
 
 -- Resultado esperado:
--- Message
--- Room
--- User
--- _UserRooms
+-- tbl_Message
+-- tbl_Room
+-- tbl_User
+-- tbl_UserRooms
 -- _prisma_migrations
